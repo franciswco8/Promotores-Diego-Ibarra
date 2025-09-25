@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planificación de Promotores</title>
+    <!-- Incluir Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+        }
+        .container {
+            transition: all 0.3s ease-in-out;
+        }
+        .photo-thumbnail {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+    <div id="app-container" class="container w-full max-w-4xl bg-gray-800 rounded-3xl shadow-2xl p-6 sm:p-10 border border-gray-700">
+        <!-- Contenedor de la vista del Promotor -->
+        <div id="promotor-view" class="active">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-blue-400 mb-2">
+                    Planificación Semanal
+                </h1>
+                <p class="text-xl text-gray-400 font-light">
+                    Actividades de Promotores -Diego Ibarra-.
+                </p>
+            </div>
+
+            <!-- Formulario de inicio de sesión -->
+            <div id="auth-container" class="mb-6 bg-gray-700 p-6 rounded-xl shadow-inner">
+                <h2 id="auth-title" class="text-2xl font-bold text-gray-200 mb-4 text-center">
+                    Iniciar sesión
+                </h2>
+                <form id="auth-form" class="space-y-4">
+                    <div>
+                        <label for="auth-email" class="block text-gray-300 font-medium mb-1">Correo Electrónico</label>
+                        <input type="email" id="auth-email" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="tu-correo@ejemplo.com" required />
+                    </div>
+                    <div>
+                        <label for="auth-password" class="block text-gray-300 font-medium mb-1">Contraseña</label>
+                        <input type="password" id="auth-password" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                    </div>
+                    <button type="submit" id="auth-button" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-700">
+                        Iniciar Sesión
+                    </button>
+                    <button type="button" id="toggle-auth-btn" class="w-full text-blue-400 hover:text-blue-300 font-medium mt-2">
+                        ¿No tienes una cuenta? Crea una.
+                    </button>
+                </form>
+            </div>
+
+            <!-- Botón de cerrar sesión -->
+            <div id="sign-out-container" class="mb-6 flex justify-center hidden">
+                <button id="sign-out-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-700">
+                    Cerrar Sesión
+                </button>
+            </div>
+
+            <!-- Mensaje de estado -->
+            <div id="status-message" class="hidden bg-blue-600 text-white font-bold p-3 rounded-lg text-center mb-4 transition-all duration-300 transform scale-105"></div>
+
+            <!-- Información del promotor -->
+            <div id="promotor-data-container" class="hidden">
+                <div class="mb-6 bg-gray-700 p-4 rounded-xl">
+                    <label for="promotor-name" class="block text-gray-300 font-medium mb-2">
+                        Nombre del Promotor
+                    </label>
+                    <input
+                        type="text"
+                        id="promotor-name"
+                        class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Ej: Promotor"
+                        required
+                    />
+                </div>
+
+                <!-- Formulario de nueva actividad -->
+                <div class="bg-gray-700 p-6 rounded-xl shadow-inner mb-6">
+                    <h2 id="form-title" class="text-2xl font-bold text-gray-200 mb-4">
+                        Nueva Actividad
+                    </h2>
+                    <form id="activity-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="col-span-1">
+                            <label for="municipio" class="block text-gray-300 font-medium mb-1">Municipio</label>
+                            <input type="text" id="municipio" name="municipio" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Diego Ibarra" required />
+                        </div>
+                        <div class="col-span-1">
+                            <label for="parroquia" class="block text-gray-300 font-medium mb-1">Parroquia</label>
+                            <input type="text" id="parroquia" name="parroquia" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Aguas Calientes" />
+                        </div>
+                        <div class="col-span-1 sm:col-span-2">
+                            <label for="actividad" class="block text-gray-300 font-medium mb-1">Actividad</label>
+                            <input type="text" id="actividad" name="actividad" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Asesoría sobre uso de VenApp" required />
+                        </div>
+                        <div class="col-span-1">
+                            <label for="dia" class="block text-gray-300 font-medium mb-1">Día</label>
+                            <select id="dia" name="dia" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option>Lunes</option>
+                                <option>Martes</option>
+                                <option>Miércoles</option>
+                                <option>Jueves</option>
+                                <option>Viernes</option>
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <label for="fecha" class="block text-gray-300 font-medium mb-1">Fecha</label>
+                            <input type="date" id="fecha" name="fecha" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                        </div>
+                        <div class="col-span-1">
+                            <label for="hora" class="block text-gray-300 font-medium mb-1">Hora</label>
+                            <input type="time" id="hora" name="hora" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                        <div class="col-span-1">
+                            <label for="lugar" class="block text-gray-300 font-medium mb-1">Lugar</label>
+                            <input type="text" id="lugar" name="lugar" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Sector Tequendama" />
+                        </div>
+                        <button type="submit" id="form-button" class="col-span-1 sm:col-span-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-700">
+                            Agregar Actividad
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Lista de actividades -->
+                <div class="bg-gray-700 p-6 rounded-xl shadow-inner mb-6">
+                    <h2 class="text-2xl font-bold text-gray-200 mb-4">
+                        Planificación Actual
+                    </h2>
+                    <div id="activities-list" class="space-y-4">
+                        <p class="text-center text-gray-400">No hay actividades planificadas.</p>
+                    </div>
+                </div>
+
+                <!-- Sección de fotos -->
+                <div class="bg-gray-700 p-6 rounded-xl shadow-inner mb-6">
+                    <h2 class="text-2xl font-bold text-gray-200 mb-4">
+                        Subir Fotos del Trabajo
+                    </h2>
+                    <div class="mb-4">
+                        <label for="photo-date" class="block text-gray-300 font-medium mb-1">Fecha del trabajo</label>
+                        <input type="date" id="photo-date" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                    </div>
+                    <div class="flex items-center space-x-4 mb-4">
+                        <input type="file" id="photo-upload-input" multiple accept="image/*" class="w-full text-white bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <button id="upload-photos-btn" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition duration-300 transform hover:scale-105">
+                            Subir
+                        </button>
+                    </div>
+                    <div id="photo-previews" class="flex flex-wrap gap-4">
+                        <!-- Las miniaturas de las fotos se renderizarán aquí -->
+                    </div>
+                </div>
+
+                <!-- Botones de guardar y ver -->
+                <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                    <button id="save-schedule-btn" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-700">
+                        Guardar Planificación Semanal
+                    </button>
+                    <button id="show-liaison-view-btn" class="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-700">
+                        Ver como Jefe de Enlace
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenedor de la vista del Jefe de Enlace -->
+        <div id="liaison-view" class="hidden">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-purple-400 mb-2">
+                    Visor de Planificaciones
+                </h1>
+                <p class="text-xl text-gray-400 font-light">
+                    Explora las planificaciones de todos los promotores.
+                </p>
+            </div>
+
+            <!-- Lista de promotores -->
+            <div class="bg-gray-700 p-6 rounded-xl shadow-inner mb-6">
+                <h2 class="text-2xl font-bold text-gray-200 mb-4">
+                    Promotores y sus Planificaciones
+                </h2>
+                <div id="liaison-list" class="space-y-4">
+                    <p class="text-center text-gray-400">Cargando datos de promotores...</p>
+                </div>
+            </div>
+
+            <!-- Botón para regresar -->
+            <button id="show-promotor-view-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-700">
+                    Volver a mi Planificación
+                </button>
+            </div>
+        </div>
+
+        <footer class="mt-8 text-gray-500 text-sm text-center space-y-1">
+            <p>ID de usuario: <span id="user-id">Autenticando...</span></p>
+            <div class="text-xs">
+                <p>Creador: Francisco Rosales</p>
+                <p>Personal Unity Studio</p>
+                <p>franciswco8@gmail.com</p>
+            </div>
+        </footer>
+    </div>
+
+    <script type="module">
+        // Importar las bibliotecas de Firebase
+        import { initializeApp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Establecer el nivel de registro en debug para una mejor visibilidad
+        setLogLevel('debug');
+
+        // Global variables from the canvas environment
+        const appId = "1:204805744165:web:1b0697ee57698d0d6801cc";
+        
+        // ¡¡¡IMPORTANTE!!! Reemplaza la siguiente constante con la configuración de tu propio proyecto de Firebase.
+        // Puedes encontrarla en la "Configuración del proyecto" > "Tus aplicaciones" > "Config".
+        const firebaseConfig = {
+            apiKey: "AIzaSyD8wcFSbcQT0BV7fTj2820A2DOcBqAw-zI",
+            authDomain: "planificador-de-promotores.firebaseapp.com",
+            projectId: "planificador-de-promotores",
+            storageBucket: "planificador-de-promotores.firebasestorage.app",
+            messagingSenderId: "204805744165",
+            appId: "1:204805744165:web:1b0697ee57698d0d6801cc"
+        };
+        
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        let currentUserId = null;
+
+        // DOM elements
+        const promotorView = document.getElementById('promotor-view');
+        const liaisonView = document.getElementById('liaison-view');
+        const showLiaisonViewBtn = document.getElementById('show-liaison-view-btn');
+        const showPromotorViewBtn = document.getElementById('show-promotor-view-btn');
+        const promotorNameInput = document.getElementById('promotor-name');
+        const activityForm = document.getElementById('activity-form');
+        const activitiesList = document.getElementById('activities-list');
+        const saveScheduleBtn = document.getElementById('save-schedule-btn');
+        const liaisonList = document.getElementById('liaison-list');
+        const formTitle = document.getElementById('form-title');
+        const formButton = document.getElementById('form-button');
+        const statusMessageEl = document.getElementById('status-message');
+        const userIdEl = document.getElementById('user-id');
+        const authContainer = document.getElementById('auth-container');
+        const authForm = document.getElementById('auth-form');
+        const authEmailInput = document.getElementById('auth-email');
+        const authPasswordInput = document.getElementById('auth-password');
+        const authTitle = document.getElementById('auth-title');
+        const authButton = document.getElementById('auth-button');
+        const toggleAuthBtn = document.getElementById('toggle-auth-btn');
+        const signOutContainer = document.getElementById('sign-out-container');
+        const signOutBtn = document.getElementById('sign-out-btn');
+        const promotorDataContainer = document.getElementById('promotor-data-container');
+        const photoUploadInput = document.getElementById('photo-upload-input');
+        const uploadPhotosBtn = document.getElementById('upload-photos-btn');
+        const photoPreviewsContainer = document.getElementById('photo-previews');
+        const photoDateInput = document.getElementById('photo-date');
+
+        // Estado local de la aplicación
+        let activities = [];
+        let photos = [];
+        let editingIndex = null;
+        let isAuthReady = false;
+        let isSigningUp = false;
+
+        // --- Funciones de Utilidad ---
+        function showTemporaryStatus(message, type = 'success') {
+            statusMessageEl.textContent = message;
+            statusMessageEl.classList.remove('hidden', 'bg-red-500', 'bg-blue-600', 'bg-teal-500');
+            statusMessageEl.classList.add('block');
+            if (type === 'error') {
+                statusMessageEl.classList.add('bg-red-500');
+            } else if (type === 'info') {
+                statusMessageEl.classList.add('bg-blue-600');
+            } else {
+                statusMessageEl.classList.add('bg-teal-500');
+            }
+            setTimeout(() => {
+                statusMessageEl.classList.add('hidden');
+            }, 4000);
+        }
+
+        // --- Lógica de la interfaz de usuario ---
+        function renderActivities() {
+            activitiesList.innerHTML = '';
+            if (activities.length === 0) {
+                activitiesList.innerHTML = '<p class="text-center text-gray-400">No hay actividades planificadas.</p>';
+            } else {
+                activities.forEach((activity, index) => {
+                    const activityEl = document.createElement('li');
+                    activityEl.className = 'bg-gray-800 p-4 rounded-lg shadow-md border border-gray-600';
+                    activityEl.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-lg font-bold text-blue-300">${activity.dia} - ${activity.fecha}</span>
+                            <div class="space-x-2">
+                                <button class="edit-btn p-2 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white transition-colors duration-200" title="Editar" data-index="${index}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+                                </button>
+                                <button class="delete-btn p-2 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors duration-200" title="Eliminar" data-index="${index}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-gray-400">
+                            <span class="font-semibold text-gray-300">Municipio:</span> ${activity.municipio}<br/>
+                            <span class="font-semibold text-gray-300">Parroquia:</span> ${activity.parroquia}<br/>
+                            <span class="font-semibold text-gray-300">Actividad:</span> ${activity.actividad}<br/>
+                            <span class="font-semibold text-gray-300">Hora:</span> ${activity.hora || 'No especificada'}<br/>
+                            <span class="font-semibold text-gray-300">Lugar:</span> ${activity.lugar || 'No especificado'}
+                        </p>
+                    `;
+                    activitiesList.appendChild(activityEl);
+                });
+
+                // Attach event listeners to new buttons
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => handleEditActivity(e.target.closest('button').dataset.index));
+                });
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => handleDeleteActivity(e.target.closest('button').dataset.index));
+                });
+            }
+        }
+
+        function renderPhotos() {
+            photoPreviewsContainer.innerHTML = '';
+            photos.forEach((photo, index) => {
+                const photoEl = document.createElement('div');
+                photoEl.className = 'relative group';
+                photoEl.innerHTML = `
+                    <img src="${photo}" alt="Foto ${index + 1}" class="photo-thumbnail">
+                    <button class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity delete-photo-btn" data-index="${index}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                `;
+                photoPreviewsContainer.appendChild(photoEl);
+            });
+            document.querySelectorAll('.delete-photo-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.closest('button').dataset.index);
+                    photos.splice(index, 1);
+                    renderPhotos();
+                    showTemporaryStatus('Foto eliminada temporalmente. Guarde la planificación para confirmar.');
+                });
+            });
+        }
+
+        function handleEditActivity(index) {
+            editingIndex = parseInt(index);
+            const activity = activities[editingIndex];
+            document.getElementById('municipio').value = activity.municipio;
+            document.getElementById('parroquia').value = activity.parroquia;
+            document.getElementById('actividad').value = activity.actividad;
+            document.getElementById('dia').value = activity.dia;
+            document.getElementById('fecha').value = activity.fecha;
+            document.getElementById('hora').value = activity.hora;
+            document.getElementById('lugar').value = activity.lugar;
+            formTitle.textContent = 'Editar Actividad';
+            formButton.textContent = 'Actualizar Actividad';
+            showTemporaryStatus('Editando actividad. Modifique los campos y presione "Actualizar".', 'info');
+        }
+
+        function handleDeleteActivity(index) {
+            activities.splice(index, 1);
+            renderActivities();
+            showTemporaryStatus('Actividad eliminada.');
+        }
+
+        function resetForm() {
+            activityForm.reset();
+            formTitle.textContent = 'Nueva Actividad';
+            formButton.textContent = 'Agregar Actividad';
+            editingIndex = null;
+        }
+
+        // --- Eventos del Formulario y Botones ---
+        activityForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(activityForm);
+            const newActivity = Object.fromEntries(formData.entries());
+
+            if (editingIndex !== null) {
+                activities[editingIndex] = newActivity;
+                resetForm();
+                showTemporaryStatus('Actividad actualizada con éxito.');
+            } else {
+                activities.push(newActivity);
+                activityForm.reset();
+                showTemporaryStatus('Actividad agregada con éxito.');
+            }
+            renderActivities();
+        });
+
+        uploadPhotosBtn.addEventListener('click', async () => {
+            if (!currentUserId) {
+                showTemporaryStatus('Error: Por favor, inicie sesión primero.', 'error');
+                return;
+            }
+            const date = photoDateInput.value;
+            if (!date) {
+                showTemporaryStatus('Por favor, seleccione una fecha para las fotos.', 'error');
+                return;
+            }
+            const files = photoUploadInput.files;
+            if (files.length === 0) {
+                showTemporaryStatus('Por favor, seleccione una o más fotos para subir.', 'error');
+                return;
+            }
+
+            showTemporaryStatus('Subiendo fotos...', 'info');
+
+            const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'promotor_schedules', currentUserId);
+
+            try {
+                // Obtener el documento actual para no sobrescribir actividades
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'promotor_data', `schedule_${date}`);
+                let docSnap = await getDoc(docRef);
+                
+                let currentPhotos = docSnap.exists() ? docSnap.data().photos || [] : [];
+                let currentActivities = docSnap.exists() ? docSnap.data().activities || [] : [];
+                let promotorName = promotorNameInput.value.trim();
+
+                const newPhotos = [...currentPhotos];
+
+                // Convertir cada archivo a Base64
+                for (const file of files) {
+                    await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            newPhotos.push(e.target.result);
+                            resolve();
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+
+                // Actualizar o crear el documento con las nuevas fotos
+                await setDoc(docRef, {
+                    promotorName,
+                    activities: currentActivities,
+                    photos: newPhotos,
+                    lastUpdated: new Date()
+                }, { merge: true }); // Usar merge para no sobrescribir actividades
+
+                // Actualizar la vista pública
+                await setDoc(publicDocRef, {
+                    promotorName,
+                    activities: currentActivities,
+                    photos: newPhotos,
+                    lastUpdated: new Date()
+                }, { merge: true });
+
+                photos = newPhotos;
+                renderPhotos();
+                photoUploadInput.value = ''; // Limpiar el input de archivos
+                showTemporaryStatus('Fotos subidas y guardadas con éxito.');
+            } catch (error) {
+                console.error("Error al subir las fotos:", error);
+                showTemporaryStatus('Error al subir las fotos.', 'error');
+            }
+        });
+
+        saveScheduleBtn.addEventListener('click', async () => {
+            if (!isAuthReady) {
+                showTemporaryStatus('Error: La base de datos no está lista.', 'error');
+                return;
+            }
+            const promotorName = promotorNameInput.value.trim();
+            if (promotorName === '') {
+                showTemporaryStatus('Por favor, ingrese su nombre de promotor.', 'error');
+                return;
+            }
+            
+            const scheduleDate = new Date().toISOString().split('T')[0]; // Usar la fecha actual como ID
+            const privateDocRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'promotor_data', `schedule_${scheduleDate}`);
+            const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'promotor_schedules', currentUserId);
+
+            try {
+                // Guardar en la colección privada del usuario
+                await setDoc(privateDocRef, {
+                    promotorName,
+                    activities,
+                    lastUpdated: new Date()
+                });
+
+                // Guardar una copia en la colección pública
+                await setDoc(publicDocRef, {
+                    promotorName,
+                    activities,
+                    lastUpdated: new Date()
+                });
+
+                showTemporaryStatus('Planificación guardada con éxito.');
+            } catch (error) {
+                console.error("Error al guardar la planificación:", error);
+                showTemporaryStatus('Error al guardar la planificación.', 'error');
+            }
+        });
+
+        // --- Lógica del Jefe de Enlace ---
+        async function renderLiaisonView() {
+            liaisonList.innerHTML = '<p class="text-center text-gray-400">Cargando datos de promotores...</p>';
+            try {
+                const publicCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'promotor_schedules');
+                const querySnapshot = await getDocs(publicCollectionRef);
+
+                if (querySnapshot.empty) {
+                    liaisonList.innerHTML = '<p class="text-center text-gray-400">No hay planificaciones para mostrar.</p>';
+                    return;
+                }
+
+                liaisonList.innerHTML = '';
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const promotorScheduleEl = document.createElement('div');
+                    promotorScheduleEl.className = 'bg-gray-800 p-4 rounded-lg shadow-md border border-gray-600 mb-4';
+                    promotorScheduleEl.innerHTML = `
+                        <h3 class="text-xl font-bold text-blue-300 mb-2">${data.promotorName}</h3>
+                        <p class="text-sm text-gray-500 mb-4">Última actualización: ${data.lastUpdated ? data.lastUpdated.toDate().toLocaleString() : 'N/A'}</p>
+                        <div class="space-y-2 mb-4">
+                            ${data.activities.map(activity => `
+                                <div class="p-3 bg-gray-900 rounded-lg border border-gray-700">
+                                    <p class="font-semibold text-gray-300">${activity.dia}: ${activity.actividad}</p>
+                                    <p class="text-xs text-gray-400">Lugar: ${activity.lugar || 'N/A'} | Hora: ${activity.hora || 'N/A'}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <h4 class="text-lg font-bold text-gray-300 mb-2">Fotos del Trabajo:</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${(data.photos || []).length > 0
+                                ? data.photos.map(photoUrl => `<img src="${photoUrl}" alt="Foto de trabajo" class="photo-thumbnail">`).join('')
+                                : '<p class="text-gray-400 text-sm">No hay fotos para esta semana.</p>'
+                            }
+                        </div>
+                    `;
+                    liaisonList.appendChild(promotorScheduleEl);
+                });
+
+            } catch (error) {
+                console.error("Error al obtener las planificaciones del Jefe de Enlace:", error);
+                liaisonList.innerHTML = '<p class="text-center text-red-400">Error al cargar los datos. Verifique la conexión.</p>';
+            }
+        }
+
+        showLiaisonViewBtn.addEventListener('click', () => {
+            promotorView.classList.add('hidden');
+            liaisonView.classList.remove('hidden');
+            renderLiaisonView();
+        });
+
+        showPromotorViewBtn.addEventListener('click', () => {
+            liaisonView.classList.add('hidden');
+            promotorView.classList.remove('hidden');
+        });
+
+        // --- Manejador de Autenticación y Carga de Datos ---
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = authEmailInput.value;
+            const password = authPasswordInput.value;
+            try {
+                if (isSigningUp) {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    showTemporaryStatus('Cuenta creada con éxito. Iniciando sesión...', 'success');
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    showTemporaryStatus('Sesión iniciada con éxito.', 'success');
+                }
+            } catch (error) {
+                console.error("Error de autenticación:", error);
+                showTemporaryStatus(`Error de autenticación: ${error.message}`, 'error');
+            }
+        });
+
+        toggleAuthBtn.addEventListener('click', () => {
+            isSigningUp = !isSigningUp;
+            if (isSigningUp) {
+                authTitle.textContent = 'Crear Cuenta';
+                authButton.textContent = 'Crear Cuenta';
+                toggleAuthBtn.textContent = '¿Ya tienes una cuenta? Inicia sesión.';
+            } else {
+                authTitle.textContent = 'Iniciar Sesión';
+                authButton.textContent = 'Iniciar Sesión';
+                toggleAuthBtn.textContent = '¿No tienes una cuenta? Crea una.';
+            }
+        });
+
+        signOutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                showTemporaryStatus('Sesión cerrada con éxito.');
+            } catch (error) {
+                console.error("Error al cerrar sesión:", error);
+                showTemporaryStatus('Error al cerrar sesión.', 'error');
+            }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                userIdEl.textContent = user.uid;
+                authContainer.classList.add('hidden');
+                signOutContainer.classList.remove('hidden');
+                promotorDataContainer.classList.remove('hidden');
+                isAuthReady = true;
+
+                // Escuchar cambios en la base de datos pública para la vista del promotor
+                const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'promotor_schedules', currentUserId);
+                onSnapshot(userDocRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        promotorNameInput.value = data.promotorName || '';
+                        activities = data.activities || [];
+                        photos = data.photos || [];
+                        renderActivities();
+                        renderPhotos();
+                    } else {
+                        // Si el documento no existe, inicializar con datos vacíos
+                        promotorNameInput.value = '';
+                        activities = [];
+                        photos = [];
+                        renderActivities();
+                        renderPhotos();
+                    }
+                }, (error) => {
+                    console.error("Error al obtener los datos en tiempo real:", error);
+                });
+
+            } else {
+                currentUserId = null;
+                userIdEl.textContent = 'No autenticado';
+                authContainer.classList.remove('hidden');
+                signOutContainer.classList.add('hidden');
+                promotorDataContainer.classList.add('hidden');
+                isAuthReady = false;
+                // Limpiar la UI si el usuario cierra sesión
+                promotorNameInput.value = '';
+                activities = [];
+                photos = [];
+                renderActivities();
+                renderPhotos();
+            }
+        });
+    </script>
+</body>
+</html>
