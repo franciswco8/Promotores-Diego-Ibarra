@@ -21,11 +21,19 @@
             object-fit: cover;
             border-radius: 8px;
         }
+        .modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-2 sm:p-4 md:p-8">
     <!-- Botón de información flotante -->
-    <div class="fixed top-4 right-4 z-50">
+    <div class="fixed top-4 right-4 z-50 no-print">
         <button id="info-btn" class="p-2 bg-gray-700 text-gray-300 rounded-full hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -58,6 +66,16 @@
         </div>
     </div>
     
+    <!-- Modal de mensaje de estado (visible por defecto) -->
+    <div id="status-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 hidden">
+        <div class="bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-700 w-11/12 max-w-sm relative text-center">
+            <p id="status-modal-message" class="text-lg text-gray-200 mb-4"></p>
+            <button id="status-modal-close-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg">
+                Aceptar
+            </button>
+        </div>
+    </div>
+
     <div id="app-container" class="container w-full max-w-4xl bg-gray-800 rounded-3xl shadow-2xl p-4 sm:p-6 md:p-10 border border-gray-700 relative">
         <!-- Contenedor de la vista del Promotor -->
         <div id="promotor-view" class="active">
@@ -66,12 +84,12 @@
                     Planificación Semanal
                 </h1>
                 <p class="text-lg sm:text-xl text-gray-400 font-light">
-                    Actividades de Promotores -Diego Ibarra-
+                    Actividades de Promotores
                 </p>
             </div>
 
             <!-- Formulario de inicio de sesión -->
-            <div id="auth-container" class="mb-6 bg-gray-700 p-4 sm:p-6 rounded-xl shadow-inner">
+            <div id="auth-container" class="mb-6 bg-gray-700 p-4 sm:p-6 rounded-xl shadow-inner no-print">
                 <h2 id="auth-title" class="text-xl sm:text-2xl font-bold text-gray-200 mb-4 text-center">
                     Iniciar sesión
                 </h2>
@@ -94,18 +112,15 @@
             </div>
 
             <!-- Botón de cerrar sesión -->
-            <div id="sign-out-container" class="mb-6 flex justify-center hidden">
+            <div id="sign-out-container" class="mb-6 flex justify-center hidden no-print">
                 <button id="sign-out-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-700">
                     Cerrar Sesión
                 </button>
             </div>
 
-            <!-- Mensaje de estado -->
-            <div id="status-message" class="hidden bg-blue-600 text-white font-bold p-3 rounded-lg text-center mb-4 transition-all duration-300 transform scale-105"></div>
-
             <!-- Información del promotor -->
             <div id="promotor-data-container" class="hidden">
-                <div class="mb-6 bg-gray-700 p-4 rounded-xl">
+                <div class="mb-6 bg-gray-700 p-4 rounded-xl no-print">
                     <label for="promotor-name" class="block text-gray-300 font-medium mb-2">
                         Nombre del Promotor
                     </label>
@@ -117,23 +132,40 @@
                         required
                     />
                 </div>
+                
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-200 mb-4 text-center print-only">
+                    Promotor: <span id="promotor-name-print"></span>
+                </h3>
+
 
                 <!-- Formulario de nueva actividad -->
-                <div class="bg-gray-700 p-4 sm:p-6 rounded-xl shadow-inner mb-6">
+                <div class="bg-gray-700 p-4 sm:p-6 rounded-xl shadow-inner mb-6 no-print">
                     <h2 id="form-title" class="text-xl sm:text-2xl font-bold text-gray-200 mb-4">
                         Nueva Actividad
                     </h2>
                     <!-- Cambiado a una cuadrícula de una columna en móviles y dos en pantallas más grandes para mejor responsividad -->
                     <form id="activity-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="col-span-1">
-                            <label for="municipio" class="block text-gray-300 font-medium mb-1">Municipio</label>
-                            <input type="text" id="municipio" name="municipio" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Diego Ibarra" required />
+                            <label for="sector" class="block text-gray-300 font-medium mb-1">Sector / Comuna / C.C.</label>
+                            <input type="text" id="sector" name="sector" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Sector Tequendama" required />
                         </div>
                         <div class="col-span-1">
-                            <label for="parroquia" class="block text-gray-300 font-medium mb-1">Parroquia</label>
-                            <input type="text" id="parroquia" name="parroquia" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Aguas Calientes" />
+                            <label for="vocero_contacto" class="block text-gray-300 font-medium mb-1">Vocero Contacto</label>
+                            <input type="text" id="vocero_contacto" name="vocero_contacto" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Juan Pérez" required />
                         </div>
-                        <div class="col-span-1 sm:col-span-2">
+                        <div class="col-span-1">
+                            <label for="cedula_vocero" class="block text-gray-300 font-medium mb-1">Cédula Vocero</label>
+                            <input type="text" id="cedula_vocero" name="cedula_vocero" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: V-12345678" />
+                        </div>
+                        <div class="col-span-1">
+                            <label for="telefono" class="block text-gray-300 font-medium mb-1">Teléfono</label>
+                            <input type="tel" id="telefono" name="telefono" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: 0412-1234567" />
+                        </div>
+                        <div class="col-span-1">
+                            <label for="voceria" class="block text-gray-300 font-medium mb-1">Vocería</label>
+                            <input type="text" id="voceria" name="voceria" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Salud" />
+                        </div>
+                        <div class="col-span-1">
                             <label for="actividad" class="block text-gray-300 font-medium mb-1">Actividad</label>
                             <input type="text" id="actividad" name="actividad" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Asesoría sobre uso de VenApp" required />
                         </div>
@@ -155,10 +187,6 @@
                             <label for="hora" class="block text-gray-300 font-medium mb-1">Hora</label>
                             <input type="time" id="hora" name="hora" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
-                        <div class="col-span-1">
-                            <label for="lugar" class="block text-gray-300 font-medium mb-1">Lugar</label>
-                            <input type="text" id="lugar" name="lugar" class="w-full bg-gray-900 border border-gray-600 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej: Sector Tequendama" />
-                        </div>
                         <button type="submit" id="form-button" class="col-span-1 sm:col-span-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-700">
                             Agregar Actividad
                         </button>
@@ -166,8 +194,8 @@
                 </div>
 
                 <!-- Lista de actividades -->
-                <div class="bg-gray-700 p-4 sm:p-6 rounded-xl shadow-inner mb-6">
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-200 mb-4">
+                <div class="bg-gray-700 p-4 sm:p-6 rounded-xl shadow-inner mb-6 activities-list-container">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-200 mb-4 print-only">
                         Planificación Actual
                     </h2>
                     <div id="activities-list" class="space-y-4">
@@ -176,7 +204,7 @@
                 </div>
 
                 <!-- Sección de fotos -->
-                <div class="bg-gray-700 p-4 sm:p-6 rounded-xl shadow-inner mb-6">
+                <div class="bg-gray-700 p-4 sm:p-6 rounded-xl shadow-inner mb-6 no-print">
                     <h2 class="text-xl sm:text-2xl font-bold text-gray-200 mb-4">
                         Subir Fotos del Trabajo
                     </h2>
@@ -197,7 +225,7 @@
                 </div>
 
                 <!-- Botones de guardar y ver -->
-                <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                <div class="mt-8 flex flex-col sm:flex-row gap-4 no-print">
                     <button id="save-schedule-btn" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-lg shadow-lg transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-700">
                         Guardar Planificación Semanal
                     </button>
@@ -210,7 +238,7 @@
 
         <!-- Contenedor de la vista del Jefe de Enlace -->
         <div id="liaison-view" class="hidden">
-            <div class="text-center mb-6 sm:mb-8">
+            <div class="text-center mb-6 sm:mb-8 no-print">
                 <h1 class="text-3xl sm:text-4xl font-extrabold text-purple-400 mb-2">
                     Visor de Planificaciones
                 </h1>
@@ -272,13 +300,16 @@
         const showLiaisonViewBtn = document.getElementById('show-liaison-view-btn');
         const showPromotorViewBtn = document.getElementById('show-promotor-view-btn');
         const promotorNameInput = document.getElementById('promotor-name');
+        const promotorNamePrint = document.getElementById('promotor-name-print');
         const activityForm = document.getElementById('activity-form');
         const activitiesList = document.getElementById('activities-list');
         const saveScheduleBtn = document.getElementById('save-schedule-btn');
         const liaisonList = document.getElementById('liaison-list');
         const formTitle = document.getElementById('form-title');
         const formButton = document.getElementById('form-button');
-        const statusMessageEl = document.getElementById('status-message');
+        const statusModal = document.getElementById('status-modal');
+        const statusModalMessage = document.getElementById('status-modal-message');
+        const statusModalCloseBtn = document.getElementById('status-modal-close-btn');
         const authContainer = document.getElementById('auth-container');
         const authForm = document.getElementById('auth-form');
         const authEmailInput = document.getElementById('auth-email');
@@ -296,8 +327,8 @@
         const infoBtn = document.getElementById('info-btn');
         const infoModal = document.getElementById('info-modal');
         const closeModalBtn = document.getElementById('close-modal-btn');
-        const userIdEl = document.getElementById('user-id'); // Ahora dentro del modal
-
+        const userIdEl = document.getElementById('user-id');
+        
         // Estado local de la aplicación
         let activities = [];
         let photos = [];
@@ -306,21 +337,14 @@
         let isSigningUp = false;
 
         // --- Funciones de Utilidad ---
-        function showTemporaryStatus(message, type = 'success') {
-            statusMessageEl.textContent = message;
-            statusMessageEl.classList.remove('hidden', 'bg-red-500', 'bg-blue-600', 'bg-teal-500');
-            statusMessageEl.classList.add('block');
-            if (type === 'error') {
-                statusMessageEl.classList.add('bg-red-500');
-            } else if (type === 'info') {
-                statusMessageEl.classList.add('bg-blue-600');
-            } else {
-                statusMessageEl.classList.add('bg-teal-500');
-            }
-            setTimeout(() => {
-                statusMessageEl.classList.add('hidden');
-            }, 4000);
+        function showTemporaryStatus(message) {
+            statusModalMessage.textContent = message;
+            statusModal.classList.remove('hidden');
         }
+
+        statusModalCloseBtn.addEventListener('click', () => {
+            statusModal.classList.add('hidden');
+        });
 
         // --- Lógica de la interfaz de usuario ---
         function renderActivities() {
@@ -330,9 +354,9 @@
             } else {
                 activities.forEach((activity, index) => {
                     const activityEl = document.createElement('li');
-                    activityEl.className = 'bg-gray-800 p-4 rounded-lg shadow-md border border-gray-600';
+                    activityEl.className = 'bg-gray-800 p-4 rounded-lg shadow-md border border-gray-600 activity-item';
                     activityEl.innerHTML = `
-                        <div class="flex justify-between items-center mb-2">
+                        <div class="flex justify-between items-center mb-2 no-print">
                             <span class="text-lg font-bold text-blue-300">${activity.dia} - ${activity.fecha}</span>
                             <div class="space-x-2">
                                 <button class="edit-btn p-2 rounded-full bg-yellow-500 hover:bg-yellow-600 text-white transition-colors duration-200" title="Editar" data-index="${index}">
@@ -344,11 +368,14 @@
                             </div>
                         </div>
                         <p class="text-gray-400">
-                            <span class="font-semibold text-gray-300">Municipio:</span> ${activity.municipio}<br/>
-                            <span class="font-semibold text-gray-300">Parroquia:</span> ${activity.parroquia}<br/>
+                            <span class="font-semibold text-gray-300 print-only">Día:</span> ${activity.dia}<br/>
+                            <span class="font-semibold text-gray-300">Sector / Comuna / C.C.:</span> ${activity.sector}<br/>
+                            <span class="font-semibold text-gray-300">Vocero Contacto:</span> ${activity.vocero_contacto}<br/>
+                            <span class="font-semibold text-gray-300">Cédula Vocero:</span> ${activity.cedula_vocero || 'No especificada'}<br/>
+                            <span class="font-semibold text-gray-300">Teléfono:</span> ${activity.telefono || 'No especificado'}<br/>
+                            <span class="font-semibold text-gray-300">Vocería:</span> ${activity.voceria || 'No especificada'}<br/>
                             <span class="font-semibold text-gray-300">Actividad:</span> ${activity.actividad}<br/>
-                            <span class="font-semibold text-gray-300">Hora:</span> ${activity.hora || 'No especificada'}<br/>
-                            <span class="font-semibold text-gray-300">Lugar:</span> ${activity.lugar || 'No especificado'}
+                            <span class="font-semibold text-gray-300">Hora:</span> ${activity.hora || 'No especificada'}
                         </p>
                     `;
                     activitiesList.appendChild(activityEl);
@@ -392,23 +419,39 @@
         function handleEditActivity(index) {
             editingIndex = parseInt(index);
             const activity = activities[editingIndex];
-            document.getElementById('municipio').value = activity.municipio;
-            document.getElementById('parroquia').value = activity.parroquia;
+            document.getElementById('sector').value = activity.sector;
+            document.getElementById('vocero_contacto').value = activity.vocero_contacto;
+            document.getElementById('cedula_vocero').value = activity.cedula_vocero;
+            document.getElementById('telefono').value = activity.telefono;
+            document.getElementById('voceria').value = activity.voceria;
             document.getElementById('actividad').value = activity.actividad;
             document.getElementById('dia').value = activity.dia;
             document.getElementById('fecha').value = activity.fecha;
             document.getElementById('hora').value = activity.hora;
-            document.getElementById('lugar').value = activity.lugar;
             formTitle.textContent = 'Editar Actividad';
             formButton.textContent = 'Actualizar Actividad';
             showTemporaryStatus('Editando actividad. Modifique los campos y presione "Actualizar".', 'info');
         }
 
-        function handleDeleteActivity(index) {
-            activities.splice(index, 1);
-            renderActivities();
-            showTemporaryStatus('Actividad eliminada.');
+        async function handleDeleteActivity(index) {
+            if (!currentUserId) {
+                showTemporaryStatus('Error: Por favor, inicie sesión primero.');
+                return;
+            }
+            
+            const updatedActivities = [...activities];
+            updatedActivities.splice(index, 1);
+
+            const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'promotor_schedules', currentUserId);
+            try {
+                await setDoc(userDocRef, { activities: updatedActivities }, { merge: true });
+                showTemporaryStatus('Actividad eliminada.');
+            } catch (error) {
+                console.error("Error al eliminar la actividad:", error);
+                showTemporaryStatus('Error al eliminar la actividad.');
+            }
         }
+
 
         function resetForm() {
             activityForm.reset();
@@ -418,21 +461,33 @@
         }
 
         // --- Eventos del Formulario y Botones ---
-        activityForm.addEventListener('submit', (e) => {
+        activityForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!currentUserId) {
+                showTemporaryStatus('Error: Por favor, inicie sesión primero.');
+                return;
+            }
+
             const formData = new FormData(activityForm);
             const newActivity = Object.fromEntries(formData.entries());
-
+            
+            let updatedActivities = [...activities];
             if (editingIndex !== null) {
-                activities[editingIndex] = newActivity;
-                resetForm();
-                showTemporaryStatus('Actividad actualizada con éxito.');
+                updatedActivities[editingIndex] = newActivity;
             } else {
-                activities.push(newActivity);
-                activityForm.reset();
-                showTemporaryStatus('Actividad agregada con éxito.');
+                updatedActivities.push(newActivity);
             }
-            renderActivities();
+
+            try {
+                const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'promotor_schedules', currentUserId);
+                await setDoc(userDocRef, { activities: updatedActivities }, { merge: true });
+                
+                resetForm();
+                showTemporaryStatus('Actividad guardada con éxito.');
+            } catch (error) {
+                console.error("Error al guardar la actividad:", error);
+                showTemporaryStatus('Error al guardar la actividad.');
+            }
         });
 
         uploadPhotosBtn.addEventListener('click', async () => {
@@ -454,11 +509,9 @@
             showTemporaryStatus('Subiendo fotos...', 'info');
 
             const publicDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'promotor_schedules', currentUserId);
-
+            
             try {
-                // Obtener el documento actual para no sobrescribir actividades
-                const docRef = doc(db, 'artifacts', appId, 'users', currentUserId, 'promotor_data', `schedule_${date}`);
-                let docSnap = await getDoc(docRef);
+                let docSnap = await getDoc(publicDocRef);
                 
                 let currentPhotos = docSnap.exists() ? docSnap.data().photos || [] : [];
                 let currentActivities = docSnap.exists() ? docSnap.data().activities || [] : [];
@@ -479,23 +532,13 @@
                 }
 
                 // Actualizar o crear el documento con las nuevas fotos
-                await setDoc(docRef, {
+                await setDoc(publicDocRef, {
                     promotorName,
                     activities: currentActivities,
                     photos: newPhotos,
                     lastUpdated: new Date()
                 }, { merge: true }); // Usar merge para no sobrescribir actividades
 
-                // Actualizar la vista pública
-                await setDoc(publicDocRef, {
-                    promotorName,
-                    activities: currentActivities,
-                    photos: newPhotos,
-                    lastUpdated: new Date()
-                }, { merge: true });
-
-                photos = newPhotos;
-                renderPhotos();
                 photoUploadInput.value = ''; // Limpiar el input de archivos
                 showTemporaryStatus('Fotos subidas y guardadas con éxito.');
             } catch (error) {
@@ -534,12 +577,13 @@
                     lastUpdated: new Date()
                 });
 
-                showTemporaryStatus('Planificación guardada con éxito.');
+                showTemporaryStatus('¡Planificación guardada con éxito!');
             } catch (error) {
                 console.error("Error al guardar la planificación:", error);
                 showTemporaryStatus('Error al guardar la planificación.', 'error');
             }
         });
+
 
         // --- Lógica del Jefe de Enlace ---
         async function renderLiaisonView() {
@@ -562,10 +606,15 @@
                         <h3 class="text-xl font-bold text-blue-300 mb-2">${data.promotorName}</h3>
                         <p class="text-sm text-gray-500 mb-4">Última actualización: ${data.lastUpdated ? data.lastUpdated.toDate().toLocaleString() : 'N/A'}</p>
                         <div class="space-y-2 mb-4">
-                            ${data.activities.map(activity => `
+                            ${(data.activities || []).map(activity => `
                                 <div class="p-3 bg-gray-900 rounded-lg border border-gray-700">
-                                    <p class="font-semibold text-gray-300">${activity.dia}: ${activity.actividad}</p>
-                                    <p class="text-xs text-gray-400">Lugar: ${activity.lugar || 'N/A'} | Hora: ${activity.hora || 'N/A'}</p>
+                                    <p class="font-semibold text-gray-300">Sector: ${activity.sector || 'N/A'}</p>
+                                    <p class="font-semibold text-gray-300">Actividad: ${activity.actividad || 'N/A'}</p>
+                                    <p class="text-xs text-gray-400">Vocero Contacto: ${activity.vocero_contacto || 'N/A'}</p>
+                                    <p class="text-xs text-gray-400">Cédula Vocero: ${activity.cedula_vocero || 'N/A'}</p>
+                                    <p class="text-xs text-gray-400">Teléfono: ${activity.telefono || 'N/A'}</p>
+                                    <p class="text-xs text-gray-400">Vocería: ${activity.voceria || 'N/A'}</p>
+                                    <p class="text-xs text-gray-400">Día: ${activity.dia || 'N/A'} | Hora: ${activity.hora || 'N/A'}</p>
                                 </div>
                             `).join('')}
                         </div>
@@ -621,14 +670,14 @@
             try {
                 if (isSigningUp) {
                     await createUserWithEmailAndPassword(auth, email, password);
-                    showTemporaryStatus('Cuenta creada con éxito. Iniciando sesión...', 'success');
+                    showTemporaryStatus('Cuenta creada con éxito.');
                 } else {
                     await signInWithEmailAndPassword(auth, email, password);
-                    showTemporaryStatus('Sesión iniciada con éxito.', 'success');
+                    showTemporaryStatus('Sesión iniciada con éxito.');
                 }
             } catch (error) {
                 console.error("Error de autenticación:", error);
-                showTemporaryStatus(`Error de autenticación: ${error.message}`, 'error');
+                showTemporaryStatus(`Error de autenticación: ${error.message}`);
             }
         });
 
@@ -651,7 +700,7 @@
                 showTemporaryStatus('Sesión cerrada con éxito.');
             } catch (error) {
                 console.error("Error al cerrar sesión:", error);
-                showTemporaryStatus('Error al cerrar sesión.', 'error');
+                showTemporaryStatus('Error al cerrar sesión.');
             }
         });
 
